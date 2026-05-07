@@ -65,33 +65,46 @@ Invoke-RestMethod -Method DELETE -Uri http://localhost:3000/tasks/$($tarea.id) -
 
 SSH es un protocolo que permite controlar un equipo remotamente desde otro. Al conectarse, se obtiene una terminal del equipo remoto y los comandos se ejecutan allá, no en el equipo local.
 
-En este caso el servidor corre en el PC con Ubuntu. Desde el PC con Windows se establece una conexión SSH hacia Ubuntu, y desde esa sesión remota se consumen los endpoints.
+En este caso tenemos dos dispositivos en una red local. El servidor corre en un PC con Ubuntu. Desde un PC con Windows se establece una conexión SSH hacia Ubuntu, y desde esa sesión remota en el PC con Windows se consumen los endpoints utilizando una terminal PowerShell que se instala en el PC con Ubuntu.
 
 **Instalación del servidor SSH en Ubuntu:**
 ```bash
 sudo apt install openssh-server
 sudo systemctl enable ssh
 sudo systemctl start ssh
+sudo systemctl status ssh
 ```
-![ssh status](imagenes/09-ssh-status.png)
+
+<img width="1048" height="382" alt="WhatsApp Image 2026-05-06 at 9 29 35 PM" src="https://github.com/user-attachments/assets/f1173176-f729-4eaf-8eaa-6a2e3da264ce" />
+<img width="914" height="458" alt="WhatsApp Image 2026-05-06 at 8 12 02 PM" src="https://github.com/user-attachments/assets/3f8223b4-3f86-45f1-815e-d198b2992286" />
+
 
 **Instalación de PowerShell en Ubuntu:**
 ```bash
 sudo snap install powershell --classic
 ```
-![powershell ubuntu](imagenes/10-pwsh-install.png)
+<img width="1047" height="164" alt="WhatsApp Image 2026-05-06 at 9 35 14 PM" src="https://github.com/user-attachments/assets/ced5fc7e-e4fe-4c7c-aca0-4451a43be4ae" />
+
 
 **Conexión desde Windows:**
 ```powershell
 ssh nico@192.168.1.5
 ```
-![conexion ssh](imagenes/11-ssh-conexion.png)
+<img width="1025" height="383" alt="image" src="https://github.com/user-attachments/assets/96595c86-fe1b-4f71-ac6f-9a2eb8ac9d20" />
+
 
 **Entrar a PowerShell dentro de Ubuntu:**
 ```bash
 pwsh
 ```
-![pwsh](imagenes/12-pwsh.png)
+<img width="1019" height="82" alt="image" src="https://github.com/user-attachments/assets/39126e3b-6d72-4bf2-8771-13e962ff645a" />
+
+**Arrancar el servidor en la PC con Ubuntu**
+```bash
+node server.js
+```
+<img width="809" height="321" alt="WhatsApp Image 2026-05-06 at 9 47 07 PM" src="https://github.com/user-attachments/assets/0edb1747-5419-41dd-912f-fdd13deb2b0f" />
+
 
 ---
 
@@ -103,30 +116,35 @@ El servidor sigue corriendo en Ubuntu. Los comandos se escriben en Windows pero 
 ```powershell
 Invoke-RestMethod -Method POST -Uri http://localhost:3000/auth/register -ContentType "application/json" -Body '{"username":"ana","email":"ana@test.com","password":"1234"}'
 ```
-![register remoto](imagenes/13-register-remoto.png)
+<img width="966" height="158" alt="image" src="https://github.com/user-attachments/assets/23499941-0478-4c4a-91c5-1a5be7d6c9c1" />
+
 
 ### Login y token
 ```powershell
 $token = (Invoke-RestMethod -Method POST -Uri http://localhost:3000/auth/login -ContentType "application/json" -Body '{"email":"ana@test.com","password":"1234"}').token
 $token
 ```
-![token remoto](imagenes/14-token-remoto.png)
+<img width="968" height="103" alt="image" src="https://github.com/user-attachments/assets/089258fb-acf5-43a2-9aa1-a980679601fe" />
+
 
 ### POST /tasks
 ```powershell
 $tarea = Invoke-RestMethod -Method POST -Uri http://localhost:3000/tasks -ContentType "application/json" -Headers @{Authorization="Bearer $token"} -Body '{"title":"Tarea de prueba","description":"Para probar PUT y DELETE"}'
 $tarea
 ```
-![tarea remota](imagenes/15-post-remoto.png)
+<img width="956" height="196" alt="image" src="https://github.com/user-attachments/assets/15b82b7f-c73f-4c5d-bde8-480260eb1641" />
+
 
 ### PUT /tasks/:id
 ```powershell
 Invoke-RestMethod -Method PUT -Uri http://localhost:3000/tasks/$($tarea.id) -ContentType "application/json" -Headers @{Authorization="Bearer $token"} -Body '{"status":"completed"}'
 ```
-![put remoto](imagenes/16-put-remoto.png)
+<img width="962" height="363" alt="image" src="https://github.com/user-attachments/assets/42d4c8a6-7b71-4644-817e-b6195364c8df" />
+
 
 ### DELETE /tasks/:id
 ```powershell
 Invoke-RestMethod -Method DELETE -Uri http://localhost:3000/tasks/$($tarea.id) -Headers @{Authorization="Bearer $token"}
 ```
-![delete remoto](imagenes/17-delete-remoto.png)
+<img width="1123" height="130" alt="image" src="https://github.com/user-attachments/assets/c19ff0e2-8436-48e7-90c1-7e1bef1e3de4" />
+
