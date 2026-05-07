@@ -8,59 +8,56 @@ El servidor corre en Windows con `node server.js` en una terminal PowerShell. La
 ```powershell
 node server.js
 ```
-![servidor corriendo](<img width="659" height="245" alt="image" src="https://github.com/user-attachments/assets/6e4a9a6c-106f-4ace-8626-fb2a6f541975" />
-)
+<img width="659" height="245" alt="image" src="https://github.com/user-attachments/assets/6e4a9a6c-106f-4ace-8626-fb2a6f541975" />
 
 ### Register
 ```powershell
 Invoke-RestMethod -Method POST -Uri http://localhost:3000/auth/register -ContentType "application/json" -Body '{"username":"ana","email":"ana@test.com","password":"1234"}'
 ```
-![register](<img width="1132" height="131" alt="image" src="https://github.com/user-attachments/assets/febe320c-11d8-4f69-9104-6496c982c763" />
-)
+<img width="1132" height="131" alt="image" src="https://github.com/user-attachments/assets/febe320c-11d8-4f69-9104-6496c982c763" />
 
 ### Login y token
 ```powershell
 $token = (Invoke-RestMethod -Method POST -Uri http://localhost:3000/auth/login -ContentType "application/json" -Body '{"email":"ana@test.com","password":"1234"}').token
 $token
 ```
-![login](<img width="1144" height="93" alt="image" src="https://github.com/user-attachments/assets/92496537-c4aa-4353-b9b1-d5f031571e80" />
-)
+<img width="1144" height="93" alt="image" src="https://github.com/user-attachments/assets/92496537-c4aa-4353-b9b1-d5f031571e80" />
+
 
 ### GET /tasks sin token (401)
 ```powershell
 Invoke-RestMethod -Method GET -Uri http://localhost:3000/tasks
 ```
-![get sin token](<img width="1129" height="165" alt="image" src="https://github.com/user-attachments/assets/39a7f364-7dc1-4f30-8b63-0cad60594140" />
-)
+<img width="1129" height="165" alt="image" src="https://github.com/user-attachments/assets/39a7f364-7dc1-4f30-8b63-0cad60594140" />
 
 ### GET /tasks con token
 ```powershell
 Invoke-RestMethod -Method GET -Uri http://localhost:3000/tasks -Headers @{Authorization="Bearer $token"}
 ```
-![get con token](<img width="1141" height="106" alt="image" src="https://github.com/user-attachments/assets/27b39948-fe21-40f4-a307-fc406701a237" />
-)
+<img width="1141" height="106" alt="image" src="https://github.com/user-attachments/assets/27b39948-fe21-40f4-a307-fc406701a237" />
+
 
 ### POST /tasks
 ```powershell
 $tarea = Invoke-RestMethod -Method POST -Uri http://localhost:3000/tasks -ContentType "application/json" -Headers @{Authorization="Bearer $token"} -Body '{"title":"Tarea de prueba","description":"Para probar PUT y DELETE"}'
 $tarea
 ```
-![crear tarea](<img width="1144" height="209" alt="image" src="https://github.com/user-attachments/assets/ca12d2f1-44b2-4dff-b1b2-8eae62b74122" />
-)
+<img width="1144" height="209" alt="image" src="https://github.com/user-attachments/assets/ca12d2f1-44b2-4dff-b1b2-8eae62b74122" />
+
 
 ### PUT /tasks/:id
 ```powershell
 Invoke-RestMethod -Method PUT -Uri http://localhost:3000/tasks/$($tarea.id) -ContentType "application/json" -Headers @{Authorization="Bearer $token"} -Body '{"status":"completed"}'
 ```
-![put tarea](<img width="1150" height="470" alt="image" src="https://github.com/user-attachments/assets/341759d6-849a-4033-818c-d68d57ff35f7" />
-)
+<img width="1150" height="470" alt="image" src="https://github.com/user-attachments/assets/341759d6-849a-4033-818c-d68d57ff35f7" />
+
 
 ### DELETE /tasks/:id
 ```powershell
 Invoke-RestMethod -Method DELETE -Uri http://localhost:3000/tasks/$($tarea.id) -Headers @{Authorization="Bearer $token"}
 ```
-![delete tarea](<img width="1146" height="162" alt="image" src="https://github.com/user-attachments/assets/81688d09-ab66-4333-95ae-94aeb1d50aa6" />
-)
+<img width="1146" height="162" alt="image" src="https://github.com/user-attachments/assets/81688d09-ab66-4333-95ae-94aeb1d50aa6" />
+
 
 ---
 
