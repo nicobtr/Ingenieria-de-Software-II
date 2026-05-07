@@ -1,18 +1,127 @@
-# Principios SOLID
+# Laboratorio JWT — API REST Node.js
 
-SOLID es un conjunto de cinco principios de diseño de software orientados a la programación orientada a objetos, aunque sus ideas pueden aplicarse de forma equivalente a otros paradigmas. Estos principios permiten que nuestro código sea más legible, fácil de mantener y escalable. SOLID es un acrónimo donde cada letra representa un principio específico: S (Single Responsibility), O (Open/Closed), L (Liskov Substitution), I (Interface Segregation) y D (Dependency Inversion).
+## Parte 1 — Validación local (Windows)
 
-## S - Single Responsibility Principle (Principio de Responsabilidad Única)
-Este principio establece que las clases, métodos, módulos, etc., deben tener una única razón para cambiar, es decir, cumplir una sola función o responsabilidad. Se aplica, por ejemplo, cuando una clase tiene muchos métodos o cuando un método realiza varias tareas muy distintas. Escribir código de esta manera puede provocar que al cambiar una funcionalidad se afecten otras sin querer. Seguir este principio ayuda a encontrar errores más fácilmente, evita que los cambios rompan otras partes del programa y hace que las pruebas unitarias sean más sencillas de realizar.
+El servidor corre en Windows con `node server.js`. Las pruebas se hacen desde PowerShell en el mismo equipo usando `localhost`.
 
-## O - Open/Closed Principle (Principio de Abierto/Cerrado)
-Este principio establece que el software debe estar abierto a la extensión pero cerrado a la modificación. Es decir, si se quiere agregar una nueva funcionalidad, no es necesario cambiar el código que ya funciona; basta con añadir código que se integre al existente. Por ejemplo, si una clase tiene un método con muchas condiciones para validar datos, esto puede generar estructuras complejas y difíciles de mantener. Para solucionarlo, se pueden crear nuevas clases que manejen cada validación por separado. Aplicar este principio ayuda a proteger el código que ya funciona y facilita que el software sea más escalable.
+### Arrancar el servidor
+```powershell
+node server.js
+```
+![servidor corriendo](imagenes/01-servidor.png)
 
-## L - Liskov Substitution Principle (Principio de Sustitución de Liskov)
-Este principio dice que las subclases o implementaciones deben poder reemplazar a sus clases base o interfaces sin cambiar el comportamiento del programa. Si una clase sigue un contrato, no debe romperlo, de manera que al sustituirla por otra, por ejemplo un servicio de prueba, el sistema siga funcionando igual. Se rompe cuando la implementación devuelve tipos distintos a los esperados, faltan métodos o propiedades, o al cambiar la clase el flujo de la aplicación se rompe. Cumplirlo hace que el código sea más confiable y fácil de probar.
+### Register
+```powershell
+Invoke-RestMethod -Method POST -Uri http://localhost:3000/auth/register -ContentType "application/json" -Body '{"username":"ana","email":"ana@test.com","password":"1234"}'
+```
+![register](imagenes/02-register.png)
 
-## I - Interface Segregation Principle (Principio de Segregación de Interfaces)
-Este principio dice que las clases, módulos o componentes no deben depender de interfaces o contratos que no usan, es decir, no deben estar obligadas a implementar métodos o funcionalidades que no van a usar o que no tienen nada que ver con su contexto. Es mejor tener varias interfaces pequeñas y específicas que una interfaz muy grande. Se rompe cuando se tienen interfaces con muchos métodos que las clases terminan dejando vacíos, por ejemplo. Cumplirlo hace que el código sea más limpio, claro y fácil de mantener porque elimina código innecesario.
+### Login y token
+```powershell
+$token = (Invoke-RestMethod -Method POST -Uri http://localhost:3000/auth/login -ContentType "application/json" -Body '{"email":"ana@test.com","password":"1234"}').token
+$token
+```
+![login](imagenes/03-login.png)
 
-## D - Dependency Inversion Principle (Principio de Inversión de Dependencias)
-Este principio establece que las clases, métodos o módulos no deben depender directamente de otras clases específicas. Se aplica, por ejemplo, cuando una clase crea otra dentro de sí misma, lo que hace que estén muy ligadas. Seguir este principio ayuda a que sea más fácil reemplazar una clase por otra, probar el código y modificarlo sin romper lo que ya funciona.
+### GET /tasks sin token (401)
+```powershell
+Invoke-RestMethod -Method GET -Uri http://localhost:3000/tasks
+```
+![get sin token](imagenes/04-get-sin-token.png)
+
+### GET /tasks con token
+```powershell
+Invoke-RestMethod -Method GET -Uri http://localhost:3000/tasks -Headers @{Authorization="Bearer $token"}
+```
+![get con token](imagenes/05-get-token.png)
+
+### POST /tasks
+```powershell
+$tarea = Invoke-RestMethod -Method POST -Uri http://localhost:3000/tasks -ContentType "application/json" -Headers @{Authorization="Bearer $token"} -Body '{"title":"Tarea de prueba","description":"Para probar PUT y DELETE"}'
+$tarea
+```
+![crear tarea](imagenes/06-post-tarea.png)
+
+### PUT /tasks/:id
+```powershell
+Invoke-RestMethod -Method PUT -Uri http://localhost:3000/tasks/$($tarea.id) -ContentType "application/json" -Headers @{Authorization="Bearer $token"} -Body '{"status":"completed"}'
+```
+![put tarea](imagenes/07-put-tarea.png)
+
+### DELETE /tasks/:id
+```powershell
+Invoke-RestMethod -Method DELETE -Uri http://localhost:3000/tasks/$($tarea.id) -Headers @{Authorization="Bearer $token"}
+```
+![delete tarea](imagenes/08-delete-tarea.png)
+
+---
+
+## Parte 2 — Conexión SSH
+
+SSH es un protocolo que permite controlar un equipo remotamente desde otro. Al conectarse, se obtiene una terminal del equipo remoto y los comandos se ejecutan allá, no en el equipo local.
+
+En este caso el servidor corre en el PC con Ubuntu. Desde el PC con Windows se establece una conexión SSH hacia Ubuntu, y desde esa sesión remota se consumen los endpoints.
+
+**Instalación del servidor SSH en Ubuntu:**
+```bash
+sudo apt install openssh-server
+sudo systemctl enable ssh
+sudo systemctl start ssh
+```
+![ssh status](imagenes/09-ssh-status.png)
+
+**Instalación de PowerShell en Ubuntu:**
+```bash
+sudo snap install powershell --classic
+```
+![powershell ubuntu](imagenes/10-pwsh-install.png)
+
+**Conexión desde Windows:**
+```powershell
+ssh nico@192.168.1.5
+```
+![conexion ssh](imagenes/11-ssh-conexion.png)
+
+**Entrar a PowerShell dentro de Ubuntu:**
+```bash
+pwsh
+```
+![pwsh](imagenes/12-pwsh.png)
+
+---
+
+## Parte 3 — Validación remota de endpoints (Ubuntu vía SSH desde Windows)
+
+El servidor sigue corriendo en Ubuntu. Los comandos se escriben en Windows pero se ejecutan en Ubuntu a través de SSH.
+
+### Register
+```powershell
+Invoke-RestMethod -Method POST -Uri http://localhost:3000/auth/register -ContentType "application/json" -Body '{"username":"ana","email":"ana@test.com","password":"1234"}'
+```
+![register remoto](imagenes/13-register-remoto.png)
+
+### Login y token
+```powershell
+$token = (Invoke-RestMethod -Method POST -Uri http://localhost:3000/auth/login -ContentType "application/json" -Body '{"email":"ana@test.com","password":"1234"}').token
+$token
+```
+![token remoto](imagenes/14-token-remoto.png)
+
+### POST /tasks
+```powershell
+$tarea = Invoke-RestMethod -Method POST -Uri http://localhost:3000/tasks -ContentType "application/json" -Headers @{Authorization="Bearer $token"} -Body '{"title":"Tarea de prueba","description":"Para probar PUT y DELETE"}'
+$tarea
+```
+![tarea remota](imagenes/15-post-remoto.png)
+
+### PUT /tasks/:id
+```powershell
+Invoke-RestMethod -Method PUT -Uri http://localhost:3000/tasks/$($tarea.id) -ContentType "application/json" -Headers @{Authorization="Bearer $token"} -Body '{"status":"completed"}'
+```
+![put remoto](imagenes/16-put-remoto.png)
+
+### DELETE /tasks/:id
+```powershell
+Invoke-RestMethod -Method DELETE -Uri http://localhost:3000/tasks/$($tarea.id) -Headers @{Authorization="Bearer $token"}
+```
+![delete remoto](imagenes/17-delete-remoto.png)
