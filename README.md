@@ -72,10 +72,14 @@ En este caso tenemos dos dispositivos en una red local. El servidor corre en un 
 sudo apt install openssh-server
 sudo systemctl enable ssh
 sudo systemctl start ssh
-sudo systemctl status ssh
 ```
 
 <img width="1048" height="382" alt="WhatsApp Image 2026-05-06 at 9 29 35 PM" src="https://github.com/user-attachments/assets/f1173176-f729-4eaf-8eaa-6a2e3da264ce" />
+
+**Comprobar si SSH está activo y funcionando en Ubuntu:**
+```bash
+sudo systemctl status ssh
+```
 <img width="914" height="458" alt="WhatsApp Image 2026-05-06 at 8 12 02 PM" src="https://github.com/user-attachments/assets/3f8223b4-3f86-45f1-815e-d198b2992286" />
 
 
@@ -84,6 +88,13 @@ sudo systemctl status ssh
 sudo snap install powershell --classic
 ```
 <img width="1047" height="164" alt="WhatsApp Image 2026-05-06 at 9 35 14 PM" src="https://github.com/user-attachments/assets/ced5fc7e-e4fe-4c7c-aca0-4451a43be4ae" />
+
+
+**Arrancar el servidor en la PC con Ubuntu**
+```bash
+node server.js
+```
+<img width="809" height="321" alt="WhatsApp Image 2026-05-06 at 9 47 07 PM" src="https://github.com/user-attachments/assets/0edb1747-5419-41dd-912f-fdd13deb2b0f" />
 
 
 **Conexión desde Windows:**
@@ -98,12 +109,6 @@ ssh nico@192.168.1.5
 pwsh
 ```
 <img width="1019" height="82" alt="image" src="https://github.com/user-attachments/assets/39126e3b-6d72-4bf2-8771-13e962ff645a" />
-
-**Arrancar el servidor en la PC con Ubuntu**
-```bash
-node server.js
-```
-<img width="809" height="321" alt="WhatsApp Image 2026-05-06 at 9 47 07 PM" src="https://github.com/user-attachments/assets/0edb1747-5419-41dd-912f-fdd13deb2b0f" />
 
 
 ---
