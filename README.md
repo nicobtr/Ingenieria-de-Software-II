@@ -2,41 +2,14 @@
 
 ## ¿De qué trata el programa?
 
-La idea es simular el sistema básico de un taller mecánico. El taller tiene un registro donde anota las reparaciones del día, atiende distintos tipos de trabajo (frenos, motor, etc.), usa un escáner de diagnóstico viejo que compraron de segunda y tiene dos formas de cobrarle al cliente: por hora o precio fijo según el trabajo.
+La idea es simular el sistema básico de un taller mecánico. El taller tiene un registro donde anota las reparaciones del día, atiende distintos tipos de trabajo (frenos, motor, etc.), usa un sistgema de facturación viejo que desarrolló alguien que ya no trabaja allí y tiene dos formas de cobrarle al cliente: por hora o precio fijo según el trabajo.
 
-Con ese contexto se aplican los cuatro patrones.
+Se aplican cuatro patrones.
 
----
-
-## Cómo correr el código
-
-```bash
-cd src
-javac *.java
-java Main
-```
-
----
 
 ## Resultado de ejecutar Main
 
-```
-=== Singleton: Registro ===
-Son el mismo objeto: true
-Reparaciones registradas hoy: 2
-
-=== Factory Method: Reparaciones ===
-Ejecutando: Cambio de frenos
-Ejecutando: Revision de motor
-
-=== Adapter: Sistema de facturacion viejo ===
-[Sistema viejo] Factura generada por: $75000.0
-Total: $75000.0
-
-=== Strategy: Cobro ===
-Cobro por hora (3h): $75000.0
-Cobro precio fijo: $80000.0
-```
+<img width="797" height="293" alt="WhatsApp Image 2026-05-09 at 8 24 30 PM" src="https://github.com/user-attachments/assets/4342f9fa-865b-4549-be2c-ea5bd248e19f" />
 
 ---
 
@@ -46,45 +19,15 @@ Cobro precio fijo: $80000.0
 
 El registro de reparaciones del día tiene que ser único. No tiene sentido que existan dos registros distintos al mismo tiempo porque las reparaciones se irían a lugares diferentes y se perdería información. Con el patrón Singleton se garantiza que sin importar cuántas veces se pida la instancia del registro, siempre es el mismo objeto.
 
-El truco está en que el constructor es `private`, entonces nadie puede hacer `new Registro()` desde afuera. La única forma de obtenerlo es con `getInstancia()`, que la primera vez lo crea y las siguientes veces devuelve el mismo.
+El truco consiste en que el constructor es `private`, entonces nadie puede hacer `new Registro()` desde afuera. La única forma de obtenerlo es con `getInstancia()`, que la primera vez lo crea y las siguientes veces devuelve el mismo.
 
-```java
-public class Registro {
+<img width="753" height="538" alt="image" src="https://github.com/user-attachments/assets/cdbbc9bd-1cb0-42cb-9b5f-cd7307d901b2" />
 
-    private static Registro instancia = null;
-    private int totalReparaciones;
-
-    private Registro() {
-        totalReparaciones = 0;
-    }
-
-    public static Registro getInstancia() {
-        if (instancia == null) {
-            instancia = new Registro();
-        }
-        return instancia;
-    }
-
-    public void agregarReparacion() {
-        totalReparaciones++;
-    }
-
-    public void mostrar() {
-        System.out.println("Reparaciones registradas hoy: " + totalReparaciones);
-    }
-}
-```
 
 En el Main se puede ver que `r1` y `r2` son el mismo objeto, y que lo que se agrega desde uno se ve en el otro:
 
-```java
-Registro r1 = Registro.getInstancia();
-Registro r2 = Registro.getInstancia();
-System.out.println("Son el mismo objeto: " + (r1 == r2)); // true
-r1.agregarReparacion();
-r1.agregarReparacion();
-r2.mostrar(); // muestra 2 aunque se llamó desde r2
-```
+<img width="540" height="128" alt="image" src="https://github.com/user-attachments/assets/f4e27a6c-ff77-4644-b983-6fa38214b3f6" />
+
 
 ---
 
@@ -92,123 +35,54 @@ r2.mostrar(); // muestra 2 aunque se llamó desde r2
 
 El taller hace distintos tipos de reparación. En vez de crear cada una directamente con `new ReparacionFreno()` o `new ReparacionMotor()` desde el main, se usa una fábrica que se encarga de eso. La clase abstracta `FabricaReparacion` define el método `crear()`, y cada subclase concreta (`FabricaFreno`, `FabricaMotor`) lo implementa y devuelve el tipo de reparación que le corresponde.
 
-Esto sirve porque si mañana el taller empieza a hacer también cambios de aceite, solo se crea `ReparacionAceite` y `FabricaAceite` sin tocar nada más del sistema.
+Esto sirve porque si después el taller empieza a hacer también cambios de aceite, solo se crea `ReparacionAceite` y `FabricaAceite` sin tocar nada más del sistema.
 
-```java
-public abstract class FabricaReparacion {
-    public abstract Reparacion crear();
-}
+<img width="540" height="144" alt="image" src="https://github.com/user-attachments/assets/865a36fe-9df5-43ab-bc24-77f4dda0cedd" />
 
-public class FabricaFreno extends FabricaReparacion {
-    @Override
-    public Reparacion crear() {
-        return new ReparacionFreno();
-    }
-}
+<img width="523" height="184" alt="image" src="https://github.com/user-attachments/assets/b2574819-77db-481d-aab1-32881477f9dc" />
 
-public class FabricaMotor extends FabricaReparacion {
-    @Override
-    public Reparacion crear() {
-        return new ReparacionMotor();
-    }
-}
-```
+<img width="551" height="189" alt="image" src="https://github.com/user-attachments/assets/6edaa5fb-02b6-4f30-a866-c885702d314d" />
+
 
 Uso en el Main:
 
-```java
-FabricaReparacion fabrica1 = new FabricaFreno();
-FabricaReparacion fabrica2 = new FabricaMotor();
+<img width="492" height="169" alt="image" src="https://github.com/user-attachments/assets/8d041489-0961-4f40-b8ba-0b034942d1ca" />
 
-Reparacion rep1 = fabrica1.crear();
-Reparacion rep2 = fabrica2.crear();
-
-rep1.ejecutar(); // "Ejecutando: Cambio de frenos"
-rep2.ejecutar(); // "Ejecutando: Revision de motor"
-```
 
 ---
 
 ### 3. Adapter (Estructural) — `AdaptadorFacturacion.java`
 
-El taller tiene un sistema de facturación viejo que hizo alguien que ya no trabaja ahí. Nadie lo quiere tocar porque es delicado y funciona, pero el problema es que su método se llama `generarFactura()` mientras que el sistema nuevo espera `calcular()` de la interfaz `EstrategiaCobro`. Son incompatibles.
+El taller tiene un sistema de facturación viejo que hizo alguien que ya no trabaja ahí. Ya funciona entonces no es buena idea tocarlo, pero el problema es que su método se llama `generarFactura()` mientras que el sistema nuevo espera `calcular()` de `EstrategiaCobro` entonces no son compatibles.
 
-El Adapter soluciona eso sin tocar ninguno de los dos lados: crea una clase que implementa `EstrategiaCobro` (lo que el sistema nuevo entiende), y por dentro lo que hace es llamar a `generarFactura()` del sistema viejo. El resto del código ni se entera de que hay un sistema viejo atrás.
+El Adapter soluciona esto sin tocar ninguno de los dos lados: se crea una clase que implementa `EstrategiaCobro` (lo que el sistema nuevo entiende), y por dentro lo que hace es llamar a `generarFactura()` del sistema viejo. 
 
-```java
-// el sistema viejo que no podemos modificar
-public class SistemaFacturacionViejo {
-    public void generarFactura(double monto) {
-        System.out.println("[Sistema viejo] Factura generada por: $" + monto);
-    }
-}
+<img width="742" height="132" alt="image" src="https://github.com/user-attachments/assets/070a15ad-6d39-4374-9f07-70363f47c01f" />
 
-// el adapter que lo hace compatible con EstrategiaCobro
-public class AdaptadorFacturacion implements EstrategiaCobro {
+<img width="779" height="324" alt="image" src="https://github.com/user-attachments/assets/eebac92f-ca3c-4bbe-a7ed-1b8e5eda0121" />
 
-    private SistemaFacturacionViejo sistemaViejo;
-
-    public AdaptadorFacturacion(SistemaFacturacionViejo sistemaViejo) {
-        this.sistemaViejo = sistemaViejo;
-    }
-
-    @Override
-    public double calcular(int horas) {
-        double monto = horas * 25000;
-        sistemaViejo.generarFactura(monto); // traduce calcular() a generarFactura()
-        return monto;
-    }
-}
-```
 
 Uso en el Main:
 
-```java
-SistemaFacturacionViejo sistemaViejo = new SistemaFacturacionViejo();
-EstrategiaCobro adaptado = new AdaptadorFacturacion(sistemaViejo);
-adaptado.calcular(3); // por dentro llama a generarFactura()
-```
+<img width="623" height="82" alt="image" src="https://github.com/user-attachments/assets/a759208f-4012-45d0-8ff5-ded503f92d50" />
 
 ---
 
 ### 4. Strategy (Comportamiento) — `EstrategiaCobro.java`
 
-El taller no siempre cobra igual. A veces cobra por hora trabajada y a veces negocia un precio fijo por el trabajo completo. La forma de cobrar puede cambiar sin que el resto del sistema tenga que cambiar también.
+El taller no siempre cobra igual. A veces cobra por hora trabajada y a veces negocia un precio fijo por el trabajo completo. La forma de cobrar puede cambiar sin que alguna otra parte del sistema tenga que cambiar también.
 
 Con Strategy se define una interfaz `EstrategiaCobro` con el método `calcular()`, y cada clase concreta implementa su propia lógica. Si en algún momento el taller quiere agregar descuento para clientes frecuentes, solo crea una nueva estrategia.
 
-```java
-public interface EstrategiaCobro {
-    double calcular(int horas);
-}
+<img width="426" height="126" alt="image" src="https://github.com/user-attachments/assets/63924df7-574a-49cd-88dc-e9643fac26d4" />
 
-public class CobrarPorHora implements EstrategiaCobro {
-    @Override
-    public double calcular(int horas) {
-        return horas * 25000;
-    }
-}
+<img width="567" height="184" alt="image" src="https://github.com/user-attachments/assets/eb41ac5d-c392-4d53-b682-f095783f1721" />
 
-public class CobrarPrecioFijo implements EstrategiaCobro {
-    private double precioFijo;
+<img width="707" height="303" alt="image" src="https://github.com/user-attachments/assets/c291014b-bdfa-4664-847c-2f618f015168" />
 
-    public CobrarPrecioFijo(double precioFijo) {
-        this.precioFijo = precioFijo;
-    }
 
-    @Override
-    public double calcular(int horas) {
-        return precioFijo;
-    }
-}
-```
 
 Uso en el Main:
 
-```java
-EstrategiaCobro porHora = new CobrarPorHora();
-EstrategiaCobro precioFijo = new CobrarPrecioFijo(80000);
+<img width="864" height="128" alt="image" src="https://github.com/user-attachments/assets/bdf1e7b0-e98d-4826-8414-b0c7ac4f7b67" />
 
-System.out.println("Cobro por hora (3h): $" + porHora.calcular(3));   // $75000
-System.out.println("Cobro precio fijo: $" + precioFijo.calcular(3));  // $80000
-```
